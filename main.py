@@ -3,6 +3,9 @@ from ShapeDetector import ShapeDetector
 import argparse
 import imutils
 import cv2
+import pytesseract
+from PIL import Image
+import matplotlib
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -19,17 +22,15 @@ ratio = image.shape[0] / float(resized.shape[0])
 # convert the resized image to grayscale, blur it slightly,
 # and threshold it
 gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+gray1 = cv2.bitwise_not(gray)
+blurred = cv2.bilateralFilter(gray1, 9,75,75)
 thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
 
-# find contours in the thresholded image and initialize the
-# shape detector
 cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-                        cv2.CHAIN_APPROX_SIMPLE)
+	cv2.CHAIN_APPROX_SIMPLE)
 cnts = imutils.grab_contours(cnts)
 sd = ShapeDetector()
 
-# loop over the contours
 for c in cnts:
     # compute the center of the contour, then detect the name of the
     # shape using only the contour
@@ -45,9 +46,9 @@ for c in cnts:
     c = c.astype("int")
     cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
     cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,
-                0.5, (255, 255, 255), 2)
+                0.5, (255, 0, 0), 2)
 
     # show the output image
     cv2.imshow("Image", image)
     cv2.waitKey(0)
-
+    break;
